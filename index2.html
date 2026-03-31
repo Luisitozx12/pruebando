@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Davivienda - Verificación Facial</title>
+    <link rel="stylesheet" href="styles-photo.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1 class="title">Tome una foto de su rostro</h1>
+            <p class="instructions">
+                Busque un espacio iluminado y haga una expresión neutra.<br>
+                No use gafas, sombreros ni accesorios que cubran su<br>
+                rostro.
+            </p>
+            
+            <div class="photo-container">
+                <div class="photo-circle">
+                    <img src="person-male.jpg" alt="Avatar" class="avatar" id="avatarImage">
+                    <input type="file" id="photoInput" accept="image/*" capture="user" style="display: none;">
+                </div>
+            </div>
+            
+            <a href="facial.html"><button type="button" class="btn-continue" id="continueBtn">Continuar</button></a>
+        </div>
+    </div>
+
+</body>
+</html>
