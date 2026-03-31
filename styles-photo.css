@@ -1,0 +1,108 @@
+/* =========================================
+   ESTILO ORIGINAL - CÍRCULO CON DOBLE BORDE AZUL
+   ========================================= */
+
+body {
+    background-color: #FFFFFF;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    padding-top: 40px;
+}
+
+.container {
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Título y subtítulo siguiendo el estilo de la imagen 1 */
+.title {
+    font-size: 32px;
+    font-weight: 300; /* Delgado como el ¡Hola! */
+    color: #333;
+    margin: 0;
+    text-align: left;
+    width: 100%;
+}
+
+.instructions {
+    font-size: 19px;
+    font-weight: 700; /* Negrita como el subtítulo del index */
+    color: #333;
+    margin: 8px 0 35px 0;
+    text-align: left;
+    width: 100%;
+    line-height: 1.3;
+}
+
+/* --- EL CÍRCULO ORIGINAL --- */
+.photo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.photo-circle {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* Borde exterior suave (el resplandor cian claro) */
+    background: #FFFFFF;
+    box-shadow: 
+        0 0 0 10px rgba(224, 247, 250, 0.5), /* Capa exterior ultra suave */
+        0 0 0 1px rgba(0, 188, 212, 0.1);    /* Borde fino exterior */
+    
+    /* El anillo azul aqua degradado */
+    border: 12px solid transparent;
+    background-image: linear-gradient(white, white), 
+                      linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 50%, #e0f7fa 100%);
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+}
+
+.avatar {
+    width: 85%; /* Para que no toque los bordes azules */
+    height: 85%;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+/* Botón idéntico al de la imagen 1 */
+.btn-continue {
+    background-color: #ed1c24;
+    color: white;
+    border: none;
+    padding: 12px 60px;
+    border-radius: 25px;
+    font-weight: bold;
+    display: block;
+    margin: 40px auto 20px auto;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.help-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+    margin-top: 20px;
+}
+
+.footer-divider {
+    border-top: 1px solid #E5E5E5;
+    margin-top: 40px;
+    width: 100%;
+    padding-top: 25px;
+}
